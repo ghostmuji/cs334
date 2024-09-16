@@ -16,6 +16,7 @@ echo "Current IP Address: $IP" > $FILE
 # copy important config files to config-repo
 cp $HOME/.config/wayfire.ini $CONFIG_DIR/wayfire.ini
 cp "$HOME/cs334/.scripts/sys-update.sh" $CONFIG_DIR/sys_update.sh
+cp "$HOME/cs334/.git/config" $CONFIG_DIR/github_config 
 
 cd $DIR
 git add ip.md

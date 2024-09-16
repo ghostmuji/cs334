@@ -4,7 +4,6 @@
 DIR="$HOME/cs334/raspberrypi"
 FILE="$DIR/ip.md"
 CONFIG_DIR="$HOME/cs334/raspberrypi/config-repo"
-SCRIPT_PATH="$HOME/cs334/.scripts/sys-update.sh"
 
 # make directory
 mkdir -p $DIR
@@ -16,7 +15,7 @@ echo "Current IP Address: $IP" > $FILE
 
 # copy important config files to config-repo
 cp $HOME/.config/wayfire.ini $CONFIG_DIR/wayfire.ini
-cp $SCRIPT_PATH $CONFIG_DIR/sys_update.sh
+cp "$HOME/cs334/.scripts/sys-update.sh" $CONFIG_DIR/sys_update.sh
 
 cd $DIR
 git add ip.md

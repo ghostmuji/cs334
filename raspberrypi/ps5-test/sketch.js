@@ -1,62 +1,50 @@
-// Daniel Shiffman
-// https://thecodingtrain.com/CodingChallenges/024-perlinnoiseflowfield.html
-
-var inc = 0.1;
-var scl = 10;
-var cols, rows;
-
-var zoff = 0;
-
-var fr;
-
-var particles = [];
-
-var flowfield;
+let sizes = [];
+let cols; let rows; let size;
+let xoff = 0; let yoff = 0; let inc = 0.05;
+let zoff = 0;
+let bgcolor = 'rgb(0,0,0)';
 
 function setup() {
-  createCanvas(600, 400);
-  cols = floor(width / scl);
-  rows = floor(height / scl);
-  fr = createP('');
+  createCanvas(windowWidth, windowHeight);
+  rectMode(CENTER);
+  frameRate(30);  // Lower frame rate to 30 for smoother performance
 
-  flowfield = new Array(cols * rows);
-
-  for (var i = 0; i < 300; i++) {
-    particles[i] = new Particle();
-  }
-  background(51);
+  // Dynamically resize grid to screen
+  size = min(windowWidth, windowHeight) / 100;  // Increased size to reduce ellipses
+  cols = floor(width / size);
+  rows = floor(height / size);
 }
 
 function draw() {
-  var yoff = 0;
-  for (var y = 0; y < rows; y++) {
-    var xoff = 0;
-    for (var x = 0; x < cols; x++) {
-      var index = x + y * cols;
-      var angle = noise(xoff, yoff, zoff) * TWO_PI * 4;
-      var v = p5.Vector.fromAngle(angle);
-      v.setMag(1);
-      flowfield[index] = v;
-      xoff += inc;
-      stroke(0, 50);
-      // push();
-      // translate(x * scl, y * scl);
-      // rotate(v.heading());
-      // strokeWeight(1);
-      // line(0, 0, scl, 0);
-      // pop();
+  background(bgcolor);
+  colorMode(HSB);
+  xoff = 0;
+  for (let i = 0; i < cols; i++) {
+    sizes[i] = [];
+    yoff = 0;
+    for (let j = 0; j < rows; j++) {
+      sizes[i][j] = map(noise(xoff, yoff, zoff), 0, 1, 0, size * 2);
+      yoff += inc;
+
+      let h = noise(zoff) * 360;
+      let s = 10;
+      let b = 100;
+
+      colorMode(HSB);
+      fill(h, s, b, noise(zoff));
+
+      // Disable shadow to boost performance
+      drawingContext.shadowColor = 'transparent';
+      
+      noStroke();
+      ellipse(size / 2 + i * size, size / 2 + j * size, sizes[i][j], sizes[i][j], 10);
     }
-    yoff += inc;
-
-    zoff += 0.0003;
+    xoff += inc;
+    zoff += 0.00005;
   }
 
-  for (var i = 0; i < particles.length; i++) {
-    particles[i].follow(flowfield);
-    particles[i].update();
-    particles[i].edges();
-    particles[i].show();
+  if (frameCount % 10 == 0) {
+    filter(BLUR, 1);  // Apply blur less frequently
   }
-
-  // fr.html(floor(frameRate()));
 }
+

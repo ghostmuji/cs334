@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+        background-color: black;
+        background-image: url(still.png);
+        background-position-x: center;
+        background-size: auto 100vh;
+        background-repeat: no-repeat;
+        margin: 0px;
+    }
+    .container {
+      display:flex;
+      justify-content: center;
+      align-items: center;
+    }
+    video {
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      opacity: 0;
+    }
+    .fade-in {
+        -webkit-transition: 2s;
+        transition: 2s;
+        opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <video id="video" autoplay loop muted>
+    <source src="loop.mp4" type="video/mp4">
+  </video>
+</div>
+
+<script>
+  const videoElement = document.getElementById("video");
+
+  // Connect to the WebSocket server
+  const socket = new WebSocket('ws://172.29.30.72:8080');
+
+  socket.onmessage = function(event) {
+      const lightValue = parseInt(event.data, 10);
+      console.log("Light value received: ", lightValue);
+
+      // If the light value is greater than 100, apply the fade-in class
+      if (lightValue > 100) {
+          videoElement.classList = "fade-in";
+      } 
+  };
+
+  socket.onopen = function() {
+      console.log("WebSocket connection established.");
+  };
+
+  socket.onclose = function() {
+      console.log("WebSocket connection closed.");
+  };
+
+  socket.onerror = function(error) {
+    console.error("WebSocket error: ", error);  // Log detailed error
+  };
+</script>
+
+</body>

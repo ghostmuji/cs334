@@ -39,32 +39,26 @@
 </div>
 
 <script>
+  let sensorData;
+
   const videoElement = document.getElementById("video");
 
   // Connect to the WebSocket server
   const socket = new WebSocket('ws://localhost:8765');
-
   socket.onmessage = function(event) {
-      const lightValue = parseInt(event.data, 10);
-      console.log("Light value received: ", lightValue);
-
-      // If the light value is greater than 100, apply the fade-in class
-      if (lightValue > 100) {
-          videoElement.classList = "fade-in";
-      } 
+    sensorData = event.data;
+    console.log(`${sensorData}`);
+    console.log("hello");
   };
 
   socket.onopen = function() {
-      console.log("WebSocket connection established.");
+    console.log('WebSocket connection established');
   };
 
   socket.onclose = function() {
-      console.log("WebSocket connection closed.");
+    console.log('WebSocket connection closed');
   };
 
-  socket.onerror = function(error) {
-    console.error("WebSocket error: ", error);  // Log detailed error
-  };
 </script>
 
 </body>

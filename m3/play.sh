@@ -14,4 +14,4 @@ fi
 
 unclutter -idle 0 &
 
-exec chromium-browser --kiosk --incognito --disable-restore-session-state --enable-logging=stderr --v=1 http://localhost:8000
+exec chromium-browser --autoplay-policy=no-user-gesture-required --incognito --disable-restore-session-state --enable-logging=stderr --v=1 http://localhost:8000

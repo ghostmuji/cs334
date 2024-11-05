@@ -14,7 +14,6 @@ async def handle_client(websocket, path):
             content = await asyncio.to_thread(tcp_connection.recv, 128)
             content = content.decode("utf-8")
             buffer += content
-            print(buffer)
 
             while "\n" in buffer:
                 message, buffer = buffer.split("\n", 1)

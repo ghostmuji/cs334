@@ -22,12 +22,31 @@
       top: 0;
       left: 0;
       opacity: 0;
+      z-index: 0;
     }
+
+    img {
+      position: absolute; 
+      z-index: 100; 
+      top: 0;
+      width: 70vh;
+      height: 100vh;
+      object-fit: cover;
+      opacity: 0;
+    }
+
     .fade-in {
         -webkit-transition: 2s;
         transition: 2s;
         opacity: 1;
     }
+
+    .fade-out {
+        -webkit-transition: 2s;
+        transition: 2s;
+        opacity: 0;
+    }
+
   </style>
 </head>
 <body>
@@ -36,19 +55,19 @@
   <video id="video" autoplay loop muted>
     <source src="loop.mp4" type="video/mp4">
   </video>
+  <img id="angel" src="jesus.png">
 </div>
 
 <script>
   let sensorData;
 
-  const videoElement = document.getElementById("video");
-
   // Connect to the WebSocket server
   const socket = new WebSocket('ws://localhost:8765');
+
   socket.onmessage = function(event) {
     sensorData = event.data;
     console.log(`${sensorData}`);
-    console.log("hello");
+    parseSensorData(sensorData);
   };
 
   socket.onopen = function() {
@@ -58,6 +77,62 @@
   socket.onclose = function() {
     console.log('WebSocket connection closed');
   };
+
+  // Parsing Sensor Data
+  function parseSensorData(data) {
+    let parts = data.split(',');
+
+    if (parts.length === 2) {
+      big_candle = parseFloat(parts[0]);
+      small_candles = parseFloat(parts[1]);
+
+      //console.log(`Parsed values: ${big_candle}, ${small_candles}`)
+
+      effects(big_candle, small_candles);
+    }
+    else {
+      console.warn(`Unexpected data format: ${data}`)
+    }
+  }
+
+  // Visual/Sound effects
+  function effects(big_candle, small_candles) {
+    let vid = document.getElementById("video");
+    let isAudioPlaying = false;
+    const audio = new Audio('angel.mp3');
+    
+    // changes from b/w -> color if big candle is lit
+    if (big_candle > 3000) {
+              document.getElementById("video").classList = "fade-in";
+            } else {
+              document.getElementById("video").classList = "fade-out";
+            }
+
+    // chants play if 1 or more small candles are lit
+    if (small_candles >= 100) {
+      vid.muted = false;
+      console.log('audio 0.05')
+      vid.volume = 0.2;
+      
+    } else if (small_candles < 100) {
+      vid.muted = true;
+      console.log('volume muted');
+    }
+
+    // angelic music plays and apparation appears if both big candle and all small candles are lit
+    if (small_candles > 1100 && big_candle > 3000) {
+      if (!isAudioPlaying) {
+        audio.play();}
+      document.getElementById("angel").classList = "fade-in";
+      isAudioPlaying = true;
+    }
+    else {
+      document.getElementById("angel").classList = "fade-out";
+      isAudioPlaying = false;
+    }
+
+  }
+
 
 </script>
 

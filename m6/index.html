@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+        background-color: black;
+        background-image: url(still.png);
+        background-position-x: center;
+        background-size: auto 100vh;
+        background-repeat: no-repeat;
+        margin: 0px;
+    }
+    .container {
+      display:flex;
+      justify-content: center;
+      align-items: center;
+    }
+    video {
+      width: 100%;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      z-index: 0;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+    }
+
+    img {
+      position: absolute; 
+      z-index: 100; 
+      top: 0;
+      width: 70vh;
+      height: 100vh;
+      object-fit: cover;
+      opacity: 0;
+    }
+
+    .fade-in {
+        -webkit-transition: 2s;
+        transition: 2s;
+        opacity: 1;
+    }
+
+    .fade-out {
+        -webkit-transition: 2s;
+        transition: 2s;
+        opacity: 0;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <video id="video" autoplay loop muted>
+    <source src="loop.mp4" type="video/mp4">
+  </video>
+  <img id="angel" src="angels.png">
+</div>
+<div class="container2">
+  <div id="overlay"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+<script src="sketch.js" type="text/javascript"></script>
+<script>
+  let sensorData;
+
+  // Connect to the TCP server
+  const socket = new WebSocket('ws://localhost:8765'); // Ensure the port matches your TCP server
+
+  socket.onmessage = function(event) {
+    sensorData = event.data;
+    console.log(`Received: ${sensorData}`);
+    parseSensorData(sensorData);
+  };
+
+  socket.onopen = function() {
+    console.log('WebSocket connection established');
+  };
+
+  socket.onclose = function() {
+    console.log('WebSocket connection closed');
+  };
+
+  // Parsing Sensor Data
+  function parseSensorData(data) {
+    let parts = data.split(','); // Split the string by commas
+
+    if (parts.length === 4) { // Ensure there are exactly 4 parts
+      // Parse the values into variables
+      const light1 = parseInt(parts[0], 10);
+      const light2 = parseInt(parts[1], 10);
+      const light3 = parseInt(parts[2], 10);
+      const load = parseInt(parts[3], 10);
+
+      // Log the parsed values
+      console.log(`Parsed values: light1=${light1}, light2=${light2}, light3=${light3}, load=${load}`);
+
+      // Use these variables as needed in your application
+      updateUI(light1, light2, light3, load);
+    } else {
+      console.warn(`Unexpected data format: ${data}`);
+    }
+  }
+
+  // Visual/Sound effects
+  function updateUI(light1, light2, light3, load) {
+    let vid = document.getElementById("video");
+    let isAudioPlaying = false;
+    const audio = new Audio('angel.mp3');
+    
+    // changes from b/w -> color if big candle is lit
+    if (light3 > 700) {
+              document.getElementById("video").classList = "fade-in";
+            } else {
+              document.getElementById("video").classList = "fade-out";
+            }
+
+    // chants play if 1 or more small candles are lit
+    if (light1 >= 1000) {
+      vid.muted = false;
+      console.log('audio 0.05')
+      vid.volume = 0.2;
+      
+    } else if (light1 < 1000) {
+      vid.muted = true;
+      console.log('volume muted');
+    }
+
+    // angelic music plays and apparation appears if both big candle and all small candles are lit
+    if (light2 > 700 && load > 700) {
+      if (!isAudioPlaying) {
+        audio.play();}
+        startSketch();
+        console.log("sketch started")
+        document.getElementById("angel").classList = "fade-in";
+      isAudioPlaying = true;
+      //gracefully fade out effects and reload page after 25 seconds
+      setTimeout(function() {
+        console.log("fading out");
+        document.getElementById("overlay").classList = "fade-out";
+        document.getElementById("video").classList = "fade-out";
+        setTimeout(function(){
+        location.reload();
+      }, 3500);
+      }, 90000);  
+    }
+
+  }
+</script>
+
+</body>
